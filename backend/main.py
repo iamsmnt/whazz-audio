@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
 from database import engine, Base
-from routers import auth, guest
+from routers import auth, guest, audio, usage_stats, admin
 
 settings = get_settings()
 
@@ -35,6 +35,9 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(guest.router)
+app.include_router(audio.router)
+app.include_router(usage_stats.router)
+app.include_router(admin.router)
 
 
 @app.get("/")

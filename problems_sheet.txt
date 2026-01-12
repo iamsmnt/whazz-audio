@@ -1,0 +1,1 @@
+1. user should be logged in or else have the guest user for accessing the upload endpoint

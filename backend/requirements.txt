@@ -10,3 +10,8 @@ passlib[bcrypt]==1.7.4
 bcrypt>=4.0.0,<5.0.0
 python-multipart==0.0.20
 email-validator==2.2.0
+
+# Celery and RabbitMQ for task queue
+celery==5.4.0
+kombu==5.4.2                # AMQP messaging library for RabbitMQ
+amqp==5.2.0                 # Low-level AMQP client

@@ -75,6 +75,66 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
     return current_user
 
 
+def get_current_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    """Get the current admin user - requires both authentication and admin privileges"""
+    if not current_user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
+
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+
+    return current_user
+
+
+def get_optional_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """
+    Get the current authenticated user from JWT token, if present.
+    Returns None if no valid token is provided (allows anonymous access).
+    """
+    # No credentials provided
+    if not credentials:
+        return None
+
+    token = credentials.credentials
+
+    # Check if token is blacklisted
+    blacklisted = db.query(TokenBlacklist).filter(TokenBlacklist.token == token).first()
+    if blacklisted:
+        return None
+
+    # Verify token
+    payload = verify_token(token)
+    if payload is None:
+        return None
+
+    # Check token type
+    if payload.get("type") != "access":
+        return None
+
+    user_id_str: Optional[str] = payload.get("sub")
+    if user_id_str is None:
+        return None
+
+    # Convert string user_id to integer
+    try:
+        user_id = int(user_id_str)
+    except (ValueError, TypeError):
+        return None
+
+    # Get user from database
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None or not user.is_active:
+        return None
+
+    return user
+
+
 def get_current_user_or_guest(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security),
     db: Session = Depends(get_db)

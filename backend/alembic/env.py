@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Import our config and models
 from config import get_settings
 from database import Base
-from models import User, TokenBlacklist, GuestSession  # Import all models
+from models import User, TokenBlacklist, GuestSession, AudioProcessingJob  # Import all models
 
 # this is the Alembic Config object
 config = context.config
